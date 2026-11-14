@@ -87,8 +87,8 @@ function App() {
         <span className="brand-copy"><strong>Islamic Student</strong><strong>Portfolio</strong><small>ZXH OFFICIAL</small></span>
       </a>
       <button className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle navigation">{menuOpen ? <X/> : <Menu/>}</button>
-      <nav className={menuOpen ? 'nav open' : 'nav'}>{navItems.map(item => <a key={item} href={'#' + item.toLowerCase().replaceAll(' ', '-')} onClick={() => setMenuOpen(false)}>{item}</a>)}</nav>
-      <button className="theme-toggle" onClick={() => setDark(!dark)} aria-label="Toggle colour theme">{dark ? <Sun size={18}/> : <Moon size={18}/>} <span>الحمدللہ</span></button>
+      <nav className={menuOpen ? 'nav open' : 'nav'}>{navItems.map(item => <a key={item} href={'#' + item.toLowerCase().replace(/ /g, '-') onClick={() => setMenuOpen(false)}>{item}</a>)}</nav>
+      <button className="theme-toggle" onClick={() => setDark(!dark)} aria-label="Toggle colour theme">{dark ? <Sun size={18}/> : <Moon size={18}/>} <span></span>الحمدﷲ</span></button>
     </header>
     <main>
       <section className="hero" id="home">
