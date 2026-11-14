@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import {
   ArrowRight, BookOpen, Building2, CheckCircle2, GraduationCap, Heart,
   Landmark, Laptop, LibraryBig, Menu, Moon, Send, ShieldCheck, Sun,
-  Users, X, Youtube, MessageCircle, SendHorizonal, Link2, Trophy, BookMarked,
+  Users, X, Youtube, MessageCircle, SendHorizonal, Link2, Share2, Copy, Trophy, BookMarked,
   BrainCircuit, Sparkles, RotateCcw, Check, CircleHelp, Bookmark, BookmarkCheck, Award, Medal, BookOpenCheck
 } from 'lucide-react';
 
@@ -45,6 +45,34 @@ function App() {
   });
   const [bookFilter, setBookFilter] = useState<'all' | 'saved'>('all');
   const [activeAchievement, setActiveAchievement] = useState<string | null>(null);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [shareFeedback, setShareFeedback] = useState('');
+
+  const portfolioUrl = typeof window !== 'undefined' ? window.location.origin + window.location.pathname : 'https://mr-zulqarnain-portfolio.vercel.app/';
+
+  async function sharePortfolio() {
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: 'Muhammad Zulqarnain | Islamic Student Portfolio', text: 'Explore my Islamic Student Portfolio.', url: portfolioUrl });
+        setShareFeedback('Thanks for sharing!');
+      } else {
+        await navigator.clipboard.writeText(portfolioUrl);
+        setShareFeedback('Portfolio link copied!');
+      }
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') return;
+      setShareFeedback('Sharing is unavailable. Please copy the link instead.');
+    }
+  }
+
+  async function copyPortfolioLink() {
+    try {
+      await navigator.clipboard.writeText(portfolioUrl);
+      setShareFeedback('Portfolio link copied!');
+    } catch {
+      setShareFeedback('Copy is unavailable in this browser.');
+    }
+  }
 
   function toggleSavedBook(title: string) {
     const next = savedBooks.includes(title)
@@ -151,7 +179,8 @@ function App() {
           <p className="hero-desc">Seeking Knowledge • Spreading Islam • Building a Better Ummah</p>
           <p className="hero-identity"><Sparkles size={15}/> Hafiz-ul-Qur’an • Dars-e-Nizami — 5th Year</p>
           <div className="social-row"><a href="#contact" aria-label="WhatsApp contact"><MessageCircle/></a><a href="#contact" aria-label="Telegram contact"><SendHorizonal/></a><a href="#projects" aria-label="Video projects"><Youtube/></a><a href="#contact" aria-label="Contact links"><Link2/></a></div>
-          <div className="hero-actions"><a className="green-button" href="#about">Explore My Portfolio <ArrowRight size={17}/></a><a className="light-button" href="#education"><span className="play-dot">▶</span> Watch Intro</a></div>
+          <div className="hero-actions"><a className="green-button" href="#about">Explore My Portfolio <ArrowRight size={17}/></a><a className="light-button" href="#education"><span className="play-dot">▶</span> Watch Intro</a><button type="button" className="portfolio-share-trigger" onClick={() => { setShareOpen(open => !open); setShareFeedback(''); }} aria-expanded={shareOpen}><Share2 size={16}/> Share Portfolio</button></div>
+          {shareOpen && <div className="portfolio-share-panel" aria-label="Share portfolio"><div className="portfolio-qr-wrap"><img src={`https://api.qrserver.com/v1/create-qr-code/?size=168x168&margin=8&data=${encodeURIComponent(portfolioUrl)}`} alt="QR code to open Muhammad Zulqarnain's portfolio" loading="lazy"/><small>SCAN TO VISIT</small></div><div className="portfolio-share-copy"><b>Share my portfolio</b><p>Send this link to friends, family or anyone interested in my learning journey.</p><div className="portfolio-share-actions"><button type="button" onClick={sharePortfolio}><Share2 size={15}/> Share</button><button type="button" onClick={copyPortfolioLink}><Copy size={15}/> Copy Link</button></div>{shareFeedback && <small className="portfolio-share-feedback" role="status">{shareFeedback}</small>}</div></div>}
         </div>
         <div className="hero-arabic" lang="ar" dir="rtl">طَلَبُ الْعِلْمِ فَرِيضَةٌ عَلَى كُلِّ مُسْلِمٍ<small>۞ ✦ ۞</small></div>
         <div className="hero-quote"><span>🕌</span><p>“Knowledge is the light<br/>that guides to success.”</p></div><div className="hero-wave"/>
