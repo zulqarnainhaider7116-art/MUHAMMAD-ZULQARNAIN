@@ -81,15 +81,47 @@ function App() {
   }
 
   return <div className={dark ? 'site dark' : 'site'}>
-    <header className="topbar">
-      <a className="brand" href="#home" onClick={() => setMenuOpen(false)}>
-        <span className="brand-emblem"><Landmark size={32}/></span>
-        <span className="brand-copy"><strong>Islamic Student</strong><strong>Portfolio</strong><small>ZXH OFFICIAL</small></span>
+
+<header className="topbar">
+  <a className="brand" href="#home" onClick={() => setMenuOpen(false)}>
+    <span className="brand-emblem"><Landmark size={32} /></span>
+    <span className="brand-copy">
+      <strong>Islamic Student</strong>
+      <strong>Portfolio</strong>
+      <small>ZXH OFFICIAL</small>
+    </span>
+  </a>
+
+  <button
+    className="menu-toggle"
+    onClick={() => setMenuOpen(!menuOpen)}
+    aria-label="Toggle navigation"
+  >
+    {menuOpen ? <X /> : <Menu />}
+  </button>
+
+  <nav className={menuOpen ? 'nav open' : 'nav'}>
+    {navItems.map(item => (
+      <a
+        key={item}
+        href={'#' + item.toLowerCase().replace(/ /g, '-')}
+        onClick={() => setMenuOpen(false)}
+      >
+        {item}
       </a>
-      <button className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle navigation">{menuOpen ? <X/> : <Menu/>}</button>
-      <nav className={menuOpen ? 'nav open' : 'nav'}>{navItems.map(item => <a key={item} href={'#' + item.toLowerCase().replace(/ /g, '-') onClick={() => setMenuOpen(false)}>{item}</a>)}</nav>
-      <button className="theme-toggle" onClick={() => setDark(!dark)} aria-label="Toggle colour theme">{dark ? <Sun size={18}/> : <Moon size={18}/>} <span></span>الحمدﷲ</span></button>
-    </header>
+    ))}
+  </nav>
+
+  <button
+    className="theme-toggle"
+    onClick={() => setDark(!dark)}
+    aria-label="Toggle colour theme"
+  >
+    {dark ? <Sun size={18} /> : <Moon size={18} />}
+    <span>الحمدللہ</span>
+  </button>
+</header>
+
     <main>
       <section className="hero" id="home">
         <div className="hero-image"><img src={photos.hero} alt="Islamic student in white attire with a Qur’an at a mosque"/></div><div className="hero-wash"/>
