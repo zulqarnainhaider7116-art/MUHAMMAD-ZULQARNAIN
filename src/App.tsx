@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import {
   ArrowRight, BookOpen, Building2, CheckCircle2, GraduationCap, Heart,
   Landmark, Laptop, LibraryBig, Menu, Moon, Send, ShieldCheck, Sun,
-  Users, X, Youtube, MessageCircle, SendHorizonal, Link2, Share2, Copy, QrCode, Trophy, BookMarked,
+  Users, X, Youtube, MessageCircle, SendHorizonal, Link2, Share2, Copy, Trophy, BookMarked,
   BrainCircuit, Sparkles, RotateCcw, Check, CircleHelp, Bookmark, BookmarkCheck, Award, Medal, BookOpenCheck
 } from 'lucide-react';
 
