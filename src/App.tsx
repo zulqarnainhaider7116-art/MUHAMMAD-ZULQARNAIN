@@ -72,7 +72,7 @@ function App() {
     if (!form.name.trim() || !form.message.trim()) { setFormError('Please add your name and message first.'); return; }
     setFormError('');
     const body = 'Assalamu Alaikum, I am ' + form.name + '.\nEmail: ' + form.email + '\nSubject: ' + form.subject + '\n\n' + form.message;
-    window.open('https://wa.me/?text=' + encodeURIComponent(body), '_blank', 'noopener,noreferrer');
+    window.open('https://wa.me/923047116587?text=' + encodeURIComponent(body), '_blank', 'noopener,noreferrer');
   }
   async function copyMessage() {
     const body = 'Assalamu Alaikum, I am ' + form.name + '.\nEmail: ' + form.email + '\nSubject: ' + form.subject + '\n\n' + form.message;
