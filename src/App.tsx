@@ -3,7 +3,7 @@ import {
   ArrowRight, BookOpen, Building2, CheckCircle2, GraduationCap, Heart,
   Landmark, Laptop, LibraryBig, Menu, Moon, Send, ShieldCheck, Sun,
   Users, X, Youtube, MessageCircle, SendHorizonal, Link2, Trophy, BookMarked,
-  BrainCircuit, Sparkles, RotateCcw, Check, CircleHelp, Bookmark, BookmarkCheck
+  BrainCircuit, Sparkles, RotateCcw, Check, CircleHelp, Bookmark, BookmarkCheck, Award, Medal, BookOpenCheck
 } from 'lucide-react';
 
 const photos = {
@@ -44,6 +44,7 @@ function App() {
     } catch { return []; }
   });
   const [bookFilter, setBookFilter] = useState<'all' | 'saved'>('all');
+  const [activeAchievement, setActiveAchievement] = useState<string | null>(null);
 
   function toggleSavedBook(title: string) {
     const next = savedBooks.includes(title)
@@ -181,6 +182,35 @@ function App() {
           <div className="project-tile"><img src="https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?auto=format&fit=crop&w=600&q=85" alt="Islamic resources hub"/><span className="project-icon"><Landmark/></span><b>Islamic Resources Hub</b><small>(Concept)</small></div>
           <div className="project-tile"><img src="https://images.unsplash.com/photo-1609599006353-e629aaabfeae?auto=format&fit=crop&w=600&q=85" alt="Dawah and education platform"/><span className="project-icon"><GraduationCap/></span><b>Dawah & Education Platform</b><small>(Concept)</small></div>
         </div></article>
+      </section>
+
+      <section className="achievement-showcase section-shell" id="achievement-showcase">
+        <div className="achievement-showcase-heading">
+          <div><p className="section-kicker">ALHAMDULILLAH · A JOURNEY OF LEARNING</p><h2>Milestones of <em>My Journey</em></h2><p>Every step in the pursuit of beneficial knowledge is a blessing and a responsibility.</p></div>
+          <span className="achievement-seal"><Award size={30}/><small>الحمدللہ</small></span>
+        </div>
+        <div className="milestone-grid">
+          <button type="button" className="milestone-card milestone-quran" onClick={() => setActiveAchievement('Hifz-ul-Qur’an Completed')}>
+            <span className="milestone-icon"><BookOpenCheck size={25}/></span><small>QUR’AN</small><h3>Hifz-ul-Qur’an</h3><p>Completed memorisation of the Holy Qur’an</p><span className="milestone-link">View milestone <ArrowRight size={15}/></span>
+          </button>
+          <button type="button" className="milestone-card milestone-study" onClick={() => setActiveAchievement('Dars-e-Nizami — 5th Year')}>
+            <span className="milestone-icon"><GraduationCap size={25}/></span><small>ISLAMIC STUDIES</small><h3>Dars-e-Nizami</h3><p>Currently continuing the 8-year course · 5th year</p><span className="milestone-link">View milestone <ArrowRight size={15}/></span>
+          </button>
+          <button type="button" className="milestone-card milestone-jamia" onClick={() => setActiveAchievement('Jamia Tul Madina')}>
+            <span className="milestone-icon"><Landmark size={25}/></span><small>INSTITUTION</small><h3>Jamia Tul Madina</h3><p>Studying at Faizan-e-Zakariya, Multan, Pakistan</p><span className="milestone-link">View milestone <ArrowRight size={15}/></span>
+          </button>
+          <button type="button" className="milestone-card milestone-purpose" onClick={() => setActiveAchievement('Seeking Beneficial Knowledge')}>
+            <span className="milestone-icon"><Medal size={25}/></span><small>PERSONAL MISSION</small><h3>Seeking Knowledge</h3><p>Striving to learn, improve character and serve the Ummah</p><span className="milestone-link">View milestone <ArrowRight size={15}/></span>
+          </button>
+        </div>
+        {activeAchievement && <div className="milestone-modal-backdrop" onClick={() => setActiveAchievement(null)}>
+          <div className="milestone-modal" role="dialog" aria-modal="true" aria-labelledby="milestone-modal-title" onClick={event => event.stopPropagation()}>
+            <button type="button" className="milestone-modal-close" onClick={() => setActiveAchievement(null)} aria-label="Close details"><X size={19}/></button>
+            <span className="achievement-seal"><Award size={27}/></span><p className="section-kicker">A PERSONAL MILESTONE</p><h3 id="milestone-modal-title">{activeAchievement}</h3>
+            <p>Alhamdulillah. This milestone is part of an ongoing journey of Islamic learning, sincerity and personal growth. May Allah grant beneficial knowledge, steadfastness and the ability to act upon it.</p>
+            <button type="button" className="green-button" onClick={() => setActiveAchievement(null)}>Close <Check size={16}/></button>
+          </div>
+        </div>}
       </section>
 
       <section className="library-section section-shell" id="library">
