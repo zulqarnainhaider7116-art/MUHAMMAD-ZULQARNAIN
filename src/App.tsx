@@ -3,7 +3,7 @@ import {
   ArrowRight, BookOpen, Building2, CheckCircle2, GraduationCap, Heart,
   Landmark, Laptop, LibraryBig, Menu, Moon, Send, ShieldCheck, Sun,
   Users, X, Youtube, MessageCircle, SendHorizonal, Link2, Trophy, BookMarked,
-  BrainCircuit, Sparkles, RotateCcw, Check, CircleHelp
+  BrainCircuit, Sparkles, RotateCcw, Check, CircleHelp, Bookmark, BookmarkCheck
 } from 'lucide-react';
 
 const photos = {
@@ -36,6 +36,23 @@ function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [dark, setDark] = useState(false);
   const [activeBook, setActiveBook] = useState<number | null>(null);
+  const [savedBooks, setSavedBooks] = useState<string[]>(() => {
+    try {
+      const stored = window.localStorage.getItem('zxh-saved-study-books');
+      const parsed: unknown = stored ? JSON.parse(stored) : [];
+      return Array.isArray(parsed) ? parsed.filter((title): title is string => typeof title === 'string') : [];
+    } catch { return []; }
+  });
+  const [bookFilter, setBookFilter] = useState<'all' | 'saved'>('all');
+
+  function toggleSavedBook(title: string) {
+    const next = savedBooks.includes(title)
+      ? savedBooks.filter(savedTitle => savedTitle !== title)
+      : [...savedBooks, title];
+    window.localStorage.setItem('zxh-saved-study-books', JSON.stringify(next));
+    setSavedBooks(next);
+  }
+  const visibleBooks = books.filter(book => bookFilter === 'all' || savedBooks.includes(book.title));
   const [form, setForm] = useState({ name: '', email: '', subject: 'General enquiry', message: '' });
   const [formError, setFormError] = useState('');
   const [copied, setCopied] = useState(false);
@@ -168,7 +185,26 @@ function App() {
 
       <section className="library-section section-shell" id="library">
         <div className="library-banner"><div><p className="section-kicker">MY STUDY COLLECTION</p><h2>Amd Books <em>Library</em></h2><p>Classical Islamic books and study references for my Dars-e-Nizami learning journey.</p></div><img src={photos.library} alt="Islamic study book"/></div>
-        <div className="book-grid">{books.map((book,index)=><button className={activeBook===index?'book-card active':'book-card'} key={book.title} onClick={()=>setActiveBook(activeBook===index?null:index)} aria-expanded={activeBook===index}><img className="book-cover" src={book.image} alt={'Book cover illustration for '+book.title}/><span className="book-arabic" lang="ar">{book.arabic}</span><b>{book.title}</b><small>{book.subject}</small><p>{activeBook===index?book.note:'Tap to view details'}</p></button>)}</div>
+        <div className="library-controls" aria-label="Filter study books">
+          <button type="button" className={bookFilter === 'all' ? 'library-filter active' : 'library-filter'} onClick={() => setBookFilter('all')}>All Books <span>{books.length}</span></button>
+          <button type="button" className={bookFilter === 'saved' ? 'library-filter active' : 'library-filter'} onClick={() => setBookFilter('saved')}><BookmarkCheck size={15}/> Saved for Later <span>{savedBooks.length}</span></button>
+        </div>
+        <div className="book-grid">
+          {visibleBooks.length > 0 ? visibleBooks.map(book => {
+            const index = books.findIndex(item => item.title === book.title);
+            const isSaved = savedBooks.includes(book.title);
+            return <div className="book-card-wrap" key={book.title}>
+              <button className={activeBook===index?'book-card active':'book-card'} onClick={()=>setActiveBook(activeBook===index?null:index)} aria-expanded={activeBook===index}>
+                <img className="book-cover" src={book.image} alt={'Book cover illustration for '+book.title}/>
+                <span className="book-arabic" lang="ar">{book.arabic}</span><b>{book.title}</b><small>{book.subject}</small>
+                <p>{activeBook===index?book.note:'Tap to view details'}</p>
+              </button>
+              <button type="button" className={isSaved ? 'book-save-button saved' : 'book-save-button'} onClick={() => toggleSavedBook(book.title)} aria-label={isSaved ? 'Remove '+book.title+' from saved books' : 'Save '+book.title+' for later'} title={isSaved ? 'Remove from saved books' : 'Save for later'}>
+                {isSaved ? <BookmarkCheck size={18}/> : <Bookmark size={18}/>}
+              </button>
+            </div>;
+          }) : <div className="library-empty"><Bookmark size={25}/><b>No saved books yet</b><p>Tap the bookmark on any book to keep it here for later.</p></div>}
+        </div>
         <p className="library-note">The listed titles are illustrative study references, not a confirmed official fifth-year syllabus. The exact kitab list may vary by institution and academic year.</p>
       </section>
 
