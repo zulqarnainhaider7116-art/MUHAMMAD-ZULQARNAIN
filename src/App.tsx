@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import {
   ArrowRight, BookOpen, Building2, CheckCircle2, GraduationCap, Heart,
   Landmark, Laptop, LibraryBig, Menu, Moon, Send, ShieldCheck, Sun,
-  Users, X, Youtube, MessageCircle, SendHorizonal, Link2, Share2, Copy, Trophy, BookMarked,
+  Users, X, Youtube, MessageCircle, SendHorizonal, Link2, Trophy, BookMarked, FileText, Search, Trash2, Pencil, Save,
   BrainCircuit, Sparkles, RotateCcw, Check, CircleHelp, Bookmark, BookmarkCheck, Award, Medal, BookOpenCheck
 } from 'lucide-react';
 
@@ -29,8 +29,9 @@ const skillItems = [
   { icon: Users, title: 'Teaching & Guidance' },
   { icon: Heart, title: 'Good Character' },
 ];
-const navItems = ['Home', 'About', 'Education', 'Skills', 'Achievements', 'Projects', 'Study Quiz', 'Contact'];
+const navItems = ['Home', 'About', 'Education', 'Skills', 'Achievements', 'Projects', 'Library', 'Study Notes', 'Study Quiz', 'Contact'];
 type QuizQuestion = { question: string; options: string[]; answer: number; explanation: string };
+type StudyNote = { id: string; title: string; subject: string; content: string; updatedAt: number };
 
 function App() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -45,34 +46,53 @@ function App() {
   });
   const [bookFilter, setBookFilter] = useState<'all' | 'saved'>('all');
   const [activeAchievement, setActiveAchievement] = useState<string | null>(null);
-  const [shareOpen, setShareOpen] = useState(false);
-  const [shareFeedback, setShareFeedback] = useState('');
-
-  const portfolioUrl = typeof window !== 'undefined' ? window.location.origin + window.location.pathname : 'https://mr-zulqarnain-portfolio.vercel.app/';
-
-  async function sharePortfolio() {
+  const [studyNotes, setStudyNotes] = useState<StudyNote[]>(() => {
     try {
-      if (navigator.share) {
-        await navigator.share({ title: 'Muhammad Zulqarnain | Islamic Student Portfolio', text: 'Explore my Islamic Student Portfolio.', url: portfolioUrl });
-        setShareFeedback('Thanks for sharing!');
-      } else {
-        await navigator.clipboard.writeText(portfolioUrl);
-        setShareFeedback('Portfolio link copied!');
-      }
-    } catch (error) {
-      if (error instanceof Error && error.name === 'AbortError') return;
-      setShareFeedback('Sharing is unavailable. Please copy the link instead.');
+      const stored = window.localStorage.getItem('zxh-islamic-study-notes');
+      const parsed: unknown = stored ? JSON.parse(stored) : [];
+      return Array.isArray(parsed) ? parsed.filter((note): note is StudyNote => note && typeof note.id === 'string' && typeof note.title === 'string' && typeof note.subject === 'string' && typeof note.content === 'string' && typeof note.updatedAt === 'number') : [];
+    } catch { return []; }
+  });
+  const [noteTitle, setNoteTitle] = useState('');
+  const [noteSubject, setNoteSubject] = useState('Fiqh');
+  const [noteContent, setNoteContent] = useState('');
+  const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
+  const [noteSearch, setNoteSearch] = useState('');
+  const [noteFilter, setNoteFilter] = useState('All Subjects');
+  const [noteMessage, setNoteMessage] = useState('');
+
+  function persistStudyNotes(next: StudyNote[]) {
+    try {
+      window.localStorage.setItem('zxh-islamic-study-notes', JSON.stringify(next));
+      setStudyNotes(next);
+      return true;
+    } catch { setNoteMessage('Could not save. Your device storage may be full.'); return false; }
+  }
+
+  function saveStudyNote(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!noteTitle.trim() || !noteContent.trim()) { setNoteMessage('Add a title and your note first.'); return; }
+    const note: StudyNote = { id: editingNoteId || String(Date.now()), title: noteTitle.trim(), subject: noteSubject, content: noteContent.trim(), updatedAt: Date.now() };
+    const next = editingNoteId ? studyNotes.map(item => item.id === editingNoteId ? note : item) : [note, ...studyNotes];
+    if (persistStudyNotes(next)) {
+      setNoteTitle(''); setNoteContent(''); setNoteSubject('Fiqh'); setEditingNoteId(null);
+      setNoteMessage(editingNoteId ? 'Note updated on this device.' : 'Note saved on this device.');
     }
   }
 
-  async function copyPortfolioLink() {
-    try {
-      await navigator.clipboard.writeText(portfolioUrl);
-      setShareFeedback('Portfolio link copied!');
-    } catch {
-      setShareFeedback('Copy is unavailable in this browser.');
+  function editStudyNote(note: StudyNote) {
+    setEditingNoteId(note.id); setNoteTitle(note.title); setNoteSubject(note.subject); setNoteContent(note.content); setNoteMessage('Editing selected note.');
+    document.getElementById('note-title')?.focus();
+  }
+
+  function deleteStudyNote(id: string) {
+    if (persistStudyNotes(studyNotes.filter(note => note.id !== id))) {
+      if (editingNoteId === id) { setEditingNoteId(null); setNoteTitle(''); setNoteContent(''); }
+      setNoteMessage('Note deleted from this device.');
     }
   }
+
+  const visibleNotes = studyNotes.filter(note => (noteFilter === 'All Subjects' || note.subject === noteFilter) && (note.title + ' ' + note.content).toLowerCase().includes(noteSearch.toLowerCase()));
 
   function toggleSavedBook(title: string) {
     const next = savedBooks.includes(title)
@@ -179,8 +199,8 @@ function App() {
           <p className="hero-desc">Seeking Knowledge • Spreading Islam • Building a Better Ummah</p>
           <p className="hero-identity"><Sparkles size={15}/> Hafiz-ul-Qur’an • Dars-e-Nizami — 5th Year</p>
           <div className="social-row"><a href="#contact" aria-label="WhatsApp contact"><MessageCircle/></a><a href="#contact" aria-label="Telegram contact"><SendHorizonal/></a><a href="#projects" aria-label="Video projects"><Youtube/></a><a href="#contact" aria-label="Contact links"><Link2/></a></div>
-          <div className="hero-actions"><a className="green-button" href="#about">Explore My Portfolio <ArrowRight size={17}/></a><a className="light-button" href="#education"><span className="play-dot">▶</span> Watch Intro</a><button type="button" className="portfolio-share-trigger" onClick={() => { setShareOpen(open => !open); setShareFeedback(''); }} aria-expanded={shareOpen}><Share2 size={16}/> Share Portfolio</button></div>
-          {shareOpen && <div className="portfolio-share-panel" aria-label="Share portfolio"><div className="portfolio-qr-wrap"><img src={`https://api.qrserver.com/v1/create-qr-code/?size=168x168&margin=8&data=${encodeURIComponent(portfolioUrl)}`} alt="QR code to open Muhammad Zulqarnain's portfolio" loading="lazy"/><small>SCAN TO VISIT</small></div><div className="portfolio-share-copy"><b>Share my portfolio</b><p>Send this link to friends, family or anyone interested in my learning journey.</p><div className="portfolio-share-actions"><button type="button" onClick={sharePortfolio}><Share2 size={15}/> Share</button><button type="button" onClick={copyPortfolioLink}><Copy size={15}/> Copy Link</button></div>{shareFeedback && <small className="portfolio-share-feedback" role="status">{shareFeedback}</small>}</div></div>}
+          <div className="hero-actions"><a className="green-button" href="#about">Explore My Portfolio <ArrowRight size={17}/></a><a className="light-button" href="#education"><span className="play-dot">▶</span> Watch Intro</a></div>
+
         </div>
         <div className="hero-arabic" lang="ar" dir="rtl">طَلَبُ الْعِلْمِ فَرِيضَةٌ عَلَى كُلِّ مُسْلِمٍ<small>۞ ✦ ۞</small></div>
         <div className="hero-quote"><span>🕌</span><p>“Knowledge is the light<br/>that guides to success.”</p></div><div className="hero-wave"/>
@@ -265,6 +285,26 @@ function App() {
           }) : <div className="library-empty"><Bookmark size={25}/><b>No saved books yet</b><p>Tap the bookmark on any book to keep it here for later.</p></div>}
         </div>
         <p className="library-note">The listed titles are illustrative study references, not a confirmed official fifth-year syllabus. The exact kitab list may vary by institution and academic year.</p>
+      </section>
+
+      <section className="study-notes section-shell" id="study-notes">
+        <div className="notes-heading"><div><p className="section-kicker">YOUR PERSONAL STUDY DESK</p><h2>My Study <em>Notes</em></h2><p>Write, organise and revise your own Dars-e-Nizami notes. They stay saved in this browser on this device.</p></div><span className="notes-count"><FileText size={22}/><b>{studyNotes.length}</b><small>Saved notes</small></span></div>
+        <div className="notes-layout">
+          <form className="note-editor" onSubmit={saveStudyNote}>
+            <div className="note-editor-title"><h3>{editingNoteId ? 'Edit your note' : 'Write a new note'}</h3>{editingNoteId && <button type="button" className="note-cancel" onClick={() => {setEditingNoteId(null);setNoteTitle('');setNoteContent('');setNoteMessage('Editing cancelled.');}}>Cancel edit</button>}</div>
+            <label htmlFor="note-title">Note title</label><input id="note-title" value={noteTitle} onChange={event => setNoteTitle(event.target.value)} placeholder="e.g. Conditions of Salah" maxLength={100} required/>
+            <label htmlFor="note-subject">Subject</label><select id="note-subject" value={noteSubject} onChange={event => setNoteSubject(event.target.value)}><option>Fiqh</option><option>Hadith</option><option>Tafsir</option><option>Aqeedah</option><option>Arabic</option><option>Usul al-Fiqh</option><option>Other</option></select>
+            <label htmlFor="note-content">Your notes</label><textarea id="note-content" rows={7} value={noteContent} onChange={event => setNoteContent(event.target.value)} placeholder="Write your lesson summary, important points, references or questions for your teacher..." required/>
+            <div className="note-editor-footer"><small>{noteContent.length} characters</small><button className="green-button" type="submit"><Save size={16}/>{editingNoteId ? 'Update Note' : 'Save Note'}</button></div>
+            {noteMessage && <p className="note-message" role="status">{noteMessage}</p>}
+          </form>
+          <div className="notes-list-panel">
+            <div className="notes-list-heading"><div><h3>Your saved notes</h3><p>Search or filter your own study material.</p></div><span>{visibleNotes.length} shown</span></div>
+            <div className="notes-tools"><label className="notes-search"><Search size={16}/><input aria-label="Search notes" value={noteSearch} onChange={event => setNoteSearch(event.target.value)} placeholder="Search your notes..."/></label><select aria-label="Filter notes by subject" value={noteFilter} onChange={event => setNoteFilter(event.target.value)}><option>All Subjects</option><option>Fiqh</option><option>Hadith</option><option>Tafsir</option><option>Aqeedah</option><option>Arabic</option><option>Usul al-Fiqh</option><option>Other</option></select></div>
+            <div className="saved-notes-list">{visibleNotes.length ? visibleNotes.map(note => <article className="saved-note" key={note.id}><div className="saved-note-top"><span>{note.subject}</span><time>{new Date(note.updatedAt).toLocaleDateString()}</time></div><h4>{note.title}</h4><p>{note.content}</p><div className="saved-note-actions"><button type="button" onClick={() => editStudyNote(note)}><Pencil size={14}/> Edit</button><button type="button" onClick={() => deleteStudyNote(note.id)}><Trash2 size={14}/> Delete</button></div></article>) : <div className="notes-empty"><FileText size={25}/><b>{studyNotes.length ? 'No matching notes' : 'No notes saved yet'}</b><p>{studyNotes.length ? 'Try another search or subject.' : 'Write your first lesson note using the form.'}</p></div>}</div>
+          </div>
+        </div>
+        <p className="notes-privacy"><ShieldCheck size={14}/> Notes are stored only in this browser on this device. They are not uploaded to a server or shared publicly.</p>
       </section>
 
       <section className="study-quiz section-shell" id="study-quiz">
